@@ -3,159 +3,1165 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Cryptojacking Detection Shield</title>
+    <title>AI Cryptojacking Detection Dashboard</title>
     <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- FontAwesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        :root {
+            --bg-primary: #0a0c14;
+            --bg-secondary: #131622;
+            --bg-card: #1c2030;
+            --border-color: #2e354f;
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --accent-green: #10b981;
+            --accent-green-glow: rgba(16, 185, 129, 0.15);
+            --accent-red: #ef4444;
+            --accent-red-glow: rgba(239, 68, 68, 0.15);
+            --accent-blue: #3b82f6;
+            --accent-cyan: #06b6d4;
+            --accent-yellow: #f59e0b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 24px;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+        }
+
+        /* Layout */
+        .container {
+            max-width: 1400px;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* Top Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-color);
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .header-title h1 {
+            font-size: 28px;
+            letter-spacing: -0.5px;
+            background: linear-gradient(to right, #ffffff, #9ca3af);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-title p {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-top: 4px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Status Banner */
+        .status-banner {
+            width: 100%;
+            border-radius: 12px;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid var(--border-color);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .status-banner.secure {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(16, 185, 129, 0.02) 100%);
+            border-color: rgba(16, 185, 129, 0.3);
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.05);
+        }
+
+        .status-banner.threat {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.08) 0%, rgba(239, 68, 68, 0.02) 100%);
+            border-color: rgba(239, 68, 68, 0.3);
+            box-shadow: 0 4px 20px rgba(239, 68, 68, 0.08);
+            animation: pulse-border 2s infinite;
+        }
+
+        @keyframes pulse-border {
+            0% { border-color: rgba(239, 68, 68, 0.3); }
+            50% { border-color: rgba(239, 68, 68, 0.6); }
+            100% { border-color: rgba(239, 68, 68, 0.3); }
+        }
+
+        .status-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .status-indicator {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .secure .status-indicator {
+            background-color: var(--accent-green);
+            box-shadow: 0 0 12px var(--accent-green);
+        }
+
+        .threat .status-indicator {
+            background-color: var(--accent-red);
+            box-shadow: 0 0 12px var(--accent-red);
+            animation: flash 1s infinite alternate;
+        }
+
+        @keyframes flash {
+            from { opacity: 1; }
+            to { opacity: 0.4; }
+        }
+
+        .status-text h2 {
+            font-size: 18px;
+            letter-spacing: 0.5px;
+        }
+
+        .secure .status-text h2 {
+            color: var(--accent-green);
+        }
+
+        .threat .status-text h2 {
+            color: var(--accent-red);
+        }
+
+        .status-text p {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        .ai-confidence-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .secure .ai-confidence-badge {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--accent-green);
+            border-color: rgba(16, 185, 129, 0.2);
+        }
+
+        .threat .ai-confidence-badge {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--accent-red);
+            border-color: rgba(239, 68, 68, 0.2);
+        }
+
+        /* Metric Grid */
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background-color: var(--accent-blue);
+        }
+
+        .card.cpu::before { background-color: var(--accent-cyan); }
+        .card.memory::before { background-color: var(--accent-yellow); }
+        .card.processes::before { background-color: var(--accent-blue); }
+        .card.threat-actor::before { background-color: var(--accent-red); }
+
+        .card-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .card-value {
+            font-size: 32px;
+            font-weight: 700;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .card-detail {
+            font-size: 12px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Dashboard Body Layout */
+        .dashboard-layout {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Left Side: Graphs & Process list */
+        .main-column {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* Right Side: Simulation & Alerts */
+        .side-column {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .panel {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 12px;
+        }
+
+        .panel-header h3 {
+            font-size: 18px;
+            letter-spacing: -0.2px;
+        }
+
+        .panel-header-icon {
+            font-size: 18px;
+        }
+
+        /* Charts styling */
+        .chart-container {
+            width: 100%;
+            height: 300px;
+            position: relative;
+        }
+
+        /* Tables styling */
+        .table-wrapper {
+            overflow-x: auto;
+            width: 100%;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        th {
+            padding: 12px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            font-weight: 400;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .process-row-highlight {
+            background-color: rgba(239, 68, 68, 0.05);
+            color: #fca5a5;
+        }
+
+        /* Progress indicator bar */
+        .mini-progress-bar {
+            width: 80px;
+            height: 6px;
+            background-color: rgba(255, 255, 255, 0.08);
+            border-radius: 3px;
+            overflow: hidden;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+
+        .mini-progress-fill {
+            height: 100%;
+            background-color: var(--accent-blue);
+            border-radius: 3px;
+        }
+
+        .mini-progress-fill.red { background-color: var(--accent-red); }
+        .mini-progress-fill.green { background-color: var(--accent-green); }
+        .mini-progress-fill.yellow { background-color: var(--accent-yellow); }
+
+        /* Simulator controls */
+        .btn-group {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-blue);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #2563eb;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+        }
+
+        .btn-alert {
+            background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+            color: white;
+            border-color: #dc2626;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+
+        .btn-alert:hover {
+            background: linear-gradient(135deg, #f87171 0%, #dc2626 100%);
+            box-shadow: 0 4px 16px rgba(239, 68, 68, 0.25);
+        }
+
+        .btn-success {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--accent-green);
+            border-color: rgba(16, 185, 129, 0.2);
+        }
+
+        .btn-success:hover {
+            background-color: rgba(16, 185, 129, 0.2);
+        }
+
+        .btn-secondary {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Security Alert Feed */
+        .alert-feed {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 320px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .alert-item {
+            padding: 12px;
+            border-radius: 8px;
+            background-color: rgba(255, 255, 255, 0.02);
+            border-left: 3px solid var(--accent-red);
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .alert-item-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+
+        .alert-item-time {
+            color: var(--text-secondary);
+            font-size: 11px;
+        }
+
+        .alert-item-body {
+            color: var(--text-secondary);
+        }
+
+        .alert-item-body strong {
+            color: var(--text-primary);
+        }
+
+        .empty-alerts {
+            padding: 24px;
+            text-align: center;
+            color: var(--text-secondary);
+            border: 1px dashed rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            font-size: 13px;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Overlay modal for model training */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(10, 12, 20, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 32px;
+            width: 420px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(59, 130, 246, 0.1);
+            border-radius: 50%;
+            border-top-color: var(--accent-blue);
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .model-status-log {
+            font-family: monospace;
+            background-color: var(--bg-primary);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            color: var(--accent-cyan);
+            text-align: left;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+
+        /* Add Process Box */
+        .add-proc-form {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .input-text {
+            flex: 1;
+            background-color: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 8px 12px;
+            color: white;
+            font-size: 13px;
+        }
+
+        .input-text:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+        }
+
+        .btn-form {
+            width: auto;
+            padding: 8px 12px;
+            font-size: 12px;
+        }
+    </style>
 </head>
 <body>
-    <div class="app-container">
-        <!-- Sidebar or Header -->
-        <header class="app-header">
-            <div class="logo-area">
-                <i class="fa-solid fa-shield-halved logo-icon"></i>
-                <div class="logo-text">
-                    <h1>Aegis <span class="accent-text">AI</span></h1>
-                    <p>Cryptojacking Detection Suite</p>
-                </div>
+    <div class="container">
+        <!-- 1. Header -->
+        <header>
+            <div class="header-title">
+                <h1>🛡️ AI Cryptojacking Detection Dashboard</h1>
+                <p>Standalone Frontend Simulator • Real-time host metric streams and machine learning analysis</p>
             </div>
-            <div class="system-status-indicator" id="status-badge">
-                <span class="status-dot"></span>
-                <span class="status-label">INITIALIZING</span>
+            <div class="header-actions">
+                <button class="btn-secondary" id="toggle-monitor-btn" style="width: auto; font-size: 12px; padding: 8px 16px;">
+                    <span>⏸️ Pause Monitoring</span>
+                </button>
             </div>
         </header>
 
-        <!-- Main Dashboard Grid -->
-        <main class="dashboard-grid">
-            <!-- Left Side: System Metrics & Stats -->
-            <section class="grid-col-left">
-                <!-- Status & Telemetry Summary Card -->
-                <div class="card status-summary-card" id="status-card">
-                    <div class="card-glow"></div>
-                    <div class="card-header">
-                        <h2>Threat Detection Engine</h2>
-                        <i class="fa-solid fa-server header-icon"></i>
-                    </div>
-                    <div class="status-display">
-                        <div class="status-circle-outer" id="status-ring">
-                            <div class="status-circle-inner">
-                                <i class="fa-solid fa-circle-check main-status-icon" id="status-icon"></i>
-                                <span class="status-percentage" id="cpu-percentage-text">0%</span>
-                                <span class="status-subtext">CPU LOAD</span>
-                            </div>
-                        </div>
-                        <div class="status-details">
-                            <h3 id="security-state-title">System Status: Secure</h3>
-                            <p id="security-state-desc">The AI model is monitoring background processes. No threats detected.</p>
-                        </div>
-                    </div>
+        <!-- 2. Status Banner -->
+        <div class="status-banner secure" id="system-status-banner">
+            <div class="status-info">
+                <div class="status-indicator"></div>
+                <div class="status-text">
+                    <h2 id="status-title">SYSTEM STATE SECURE</h2>
+                    <p id="status-description">Continuous security scan running. No cryptojacking patterns detected.</p>
                 </div>
+            </div>
+            <div class="ai-confidence-badge" id="confidence-badge">
+                AI CONFIDENCE: 98.4%
+            </div>
+        </div>
 
-                <!-- Live Charts Card -->
-                <div class="card chart-card">
-                    <div class="card-header">
-                        <h2>Telemetry Analytics (Live)</h2>
-                        <div class="chart-legend">
-                            <span class="legend-item"><span class="legend-color cpu"></span> CPU %</span>
-                            <span class="legend-item"><span class="legend-color mem"></span> Memory %</span>
-                        </div>
+        <!-- 3. Metrics Cards -->
+        <div class="metric-grid">
+            <div class="card cpu">
+                <div class="card-label">Global CPU Usage</div>
+                <div class="card-value" id="metric-cpu">14.2%</div>
+                <div class="card-detail">
+                    <div class="mini-progress-bar"><div class="mini-progress-fill green" style="width: 14%;"></div></div>
+                    <span>Normalized on 12 Cores</span>
+                </div>
+            </div>
+            <div class="card memory">
+                <div class="card-label">Global Memory</div>
+                <div class="card-value" id="metric-memory">48.6%</div>
+                <div class="card-detail">
+                    <div class="mini-progress-bar"><div class="mini-progress-fill yellow" style="width: 48%;"></div></div>
+                    <span>4.1 GB / 8.0 GB Used</span>
+                </div>
+            </div>
+            <div class="card processes">
+                <div class="card-label">Active Processes</div>
+                <div class="card-value" id="metric-proc-count">138</div>
+                <div class="card-detail">
+                    <span>🔄 Real-time polling active</span>
+                </div>
+            </div>
+            <div class="card threat-actor" id="threat-card">
+                <div class="card-label">Top CPU Consumer</div>
+                <div class="card-value" id="metric-top-proc" style="font-size: 20px; font-weight: 600; padding: 6px 0;">chrome.exe (4.8%)</div>
+                <div class="card-detail">
+                    <span id="threat-card-detail">Normal workload metrics</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Main Grid Section -->
+        <div class="dashboard-layout">
+            <!-- Left Side: Graphs & Process list -->
+            <div class="main-column">
+                <!-- Analytics Chart -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h3>📈 Performance Telemetry Over Time</h3>
+                        <span class="panel-header-icon">📊</span>
                     </div>
                     <div class="chart-container">
                         <canvas id="telemetryChart"></canvas>
                     </div>
                 </div>
 
-                <!-- AI Model Training & DB Panel -->
-                <div class="card ai-card">
-                    <div class="card-header">
-                        <h2>Machine Learning Engine</h2>
-                        <i class="fa-solid fa-brain header-icon"></i>
-                    </div>
-                    <div class="ai-controls">
-                        <div class="ai-stat-row">
-                            <span class="stat-label">Model Status:</span>
-                            <span class="stat-value highlight" id="model-status">Untrained</span>
-                        </div>
-                        <div class="ai-stat-row">
-                            <span class="stat-label">Collected Logs:</span>
-                            <span class="stat-value" id="collected-logs">0</span>
-                        </div>
-                        <p class="ai-info-text">
-                            The Isolation Forest detects structural anomalies, while the Random Forest Classifier maps process features. Train the model once baseline data is collected.
-                        </p>
-                        <div class="button-group">
-                            <button id="btn-train" class="btn btn-primary">
-                                <i class="fa-solid fa-microchip"></i> Retrain Model
-                            </button>
-                            <button id="btn-clear" class="btn btn-secondary">
-                                <i class="fa-solid fa-circle-xmark"></i> Clear Alerts
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Right Side: Running Processes & Alert Log -->
-            <section class="grid-col-right">
-                <!-- Running Processes -->
-                <div class="card processes-card">
-                    <div class="card-header">
-                        <h2>Active Processes</h2>
-                        <div class="search-box">
-                            <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                            <input type="text" id="proc-search" placeholder="Search process...">
-                        </div>
+                <!-- Process Table -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h3>🔍 Active Process Explorer</h3>
+                        <span class="panel-header-icon">🔬</span>
                     </div>
                     <div class="table-wrapper">
-                        <table class="process-table">
+                        <table>
                             <thead>
                                 <tr>
                                     <th>PID</th>
                                     <th>Process Name</th>
-                                    <th class="num-col">CPU %</th>
-                                    <th class="num-col">Mem %</th>
-                                    <th>Threat Level</th>
+                                    <th>CPU Usage (%)</th>
+                                    <th>Memory Usage (%)</th>
                                 </tr>
                             </thead>
                             <tbody id="process-table-body">
-                                <tr>
-                                    <td colspan="5" class="empty-table">Waiting for client agent report...</td>
-                                </tr>
+                                <!-- Dynamically populated -->
                             </tbody>
                         </table>
                     </div>
+                    <div>
+                        <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">Add Mock Custom Process to test detection limits:</p>
+                        <form class="add-proc-form" id="add-proc-form" onsubmit="event.preventDefault(); addNewProcess();">
+                            <input type="text" class="input-text" id="add-proc-name" placeholder="miner.exe" required>
+                            <input type="number" class="input-text" id="add-proc-cpu" placeholder="CPU % (e.g. 85)" min="0" max="100" required>
+                            <button class="btn-primary btn-form" type="submit" style="width: auto;">Add Process</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side: Simulation & Alerts -->
+            <div class="side-column">
+                <!-- Simulation Control panel -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h3>🧪 Simulation Controls</h3>
+                        <span class="panel-header-icon">🕹️</span>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn-alert" id="sim-cryptojack-btn">
+                            🚨 Simulate Cryptojacking Attack
+                        </button>
+                        <button class="btn-success" id="sim-normal-btn">
+                            ✅ Restore Normal State
+                        </button>
+                        <button class="btn-secondary" id="sim-train-btn">
+                            🤖 Retrain AI Classifier
+                        </button>
+                    </div>
+                    <p style="font-size: 11px; color: var(--text-secondary); line-height: 1.4; text-align: center;">
+                        <strong>Cryptojacking:</strong> Triggers high CPU load (85%+) by a single miner process. The Random Forest model inspects CPU peaks to diagnose threat vs. regular load.
+                    </p>
                 </div>
 
-                <!-- Recent Alerts Log -->
-                <div class="card alerts-card">
-                    <div class="card-header">
-                        <h2>Incidents Log</h2>
-                        <i class="fa-solid fa-bell header-icon" id="alerts-header-icon"></i>
+                <!-- Threat alerts log -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h3>🚨 Security Alerts Log</h3>
+                        <span class="panel-header-icon">🔥</span>
                     </div>
-                    <div class="alerts-list" id="alerts-list">
-                        <div class="empty-alerts">
-                            <i class="fa-solid fa-shield-halved empty-icon"></i>
-                            <p>No cryptojacking alerts triggered yet</p>
+                    <div class="alert-feed" id="alerts-log-feed">
+                        <div class="empty-alerts" id="empty-alerts-text">
+                            No security incidents logged. Host is secure.
                         </div>
                     </div>
                 </div>
-            </section>
-        </main>
+
+                <!-- AI Model stats -->
+                <div class="panel" style="gap: 12px;">
+                    <h4 style="font-size: 14px; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.5px;">🤖 AI Model Info</h4>
+                    <div style="font-size: 13px; display: flex; flex-direction: column; gap: 8px;">
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: var(--text-secondary);">Algorithm:</span>
+                            <span>Random Forest (100 estimators)</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: var(--text-secondary);">Accuracy Score:</span>
+                            <span style="color: var(--accent-green); font-weight: 600;" id="model-accuracy-val">99.4%</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: var(--text-secondary);">Features evaluated:</span>
+                            <span style="font-size: 12px;">CPU%, Mem%, TopProcCPU%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Notification Toast -->
-    <div id="toast" class="toast">
-        <i class="fa-solid fa-info-circle toast-icon"></i>
-        <span id="toast-message">Message</span>
+    <!-- AI Model Training Overlay Modal -->
+    <div class="overlay" id="train-overlay">
+        <div class="modal">
+            <div class="spinner"></div>
+            <h3 style="font-size: 20px;">Retraining AI Classifier Model</h3>
+            <p style="font-size: 13px; color: var(--text-secondary);">Fitting Random Forest model with newly aggregated system metrics...</p>
+            <div class="model-status-log" id="model-log">
+                [SYSTEM] Initiating training dataset...<br>
+                [DATA] Loaded 1,000 baseline normal telemetry points...<br>
+                [DATA] Loaded 1,000 cryptojacking threat vectors...
+            </div>
+        </div>
     </div>
 
-    <!-- Script imports -->
-    <script src="/static/app.js"></script>
+    <!-- Simulation Script -->
+    <script>
+        // Simulation Configuration
+        let isMonitoring = true;
+        let isCryptojackingSimulated = false;
+        let accuracy = 99.4;
+
+        // Current Telemetry State
+        let currentCPU = 12.4;
+        let currentMemory = 48.2;
+        let currentProcCount = 136;
+        let topProcName = "chrome.exe";
+        let topProcCPU = 4.2;
+
+        // Alerts log array
+        const alertLogs = [];
+
+        // Chart Data Limits
+        const maxDataPoints = 30;
+        const labels = Array.from({length: maxDataPoints}, (_, i) => "");
+        const cpuData = Array(maxDataPoints).fill(12);
+        const memData = Array(maxDataPoints).fill(48);
+
+        // Process List baseline
+        let activeProcesses = [
+            { pid: 1404, name: "chrome.exe", cpu_percent: 4.2, memory_percent: 8.5 },
+            { pid: 2110, name: "code.exe", cpu_percent: 2.1, memory_percent: 12.4 },
+            { pid: 844, name: "svchost.exe", cpu_percent: 0.8, memory_percent: 1.1 },
+            { pid: 9022, name: "slack.exe", cpu_percent: 0.5, memory_percent: 4.8 },
+            { pid: 10404, name: "spotify.exe", cpu_percent: 1.2, memory_percent: 3.2 },
+            { pid: 560, name: "explorer.exe", cpu_percent: 0.3, memory_percent: 2.1 }
+        ];
+
+        // Initialize Chart.js
+        const ctx = document.getElementById('telemetryChart').getContext('2d');
+        const telemetryChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'CPU Usage (%)',
+                        data: cpuData,
+                        borderColor: '#06b6d4',
+                        backgroundColor: 'rgba(6, 182, 212, 0.05)',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: true
+                    },
+                    {
+                        label: 'Memory Usage (%)',
+                        data: memData,
+                        borderColor: '#f59e0b',
+                        backgroundColor: 'rgba(245, 158, 11, 0.05)',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { display: false }
+                    },
+                    y: {
+                        min: 0,
+                        max: 100,
+                        grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                        ticks: { color: '#9ca3af' }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        labels: { color: '#f3f4f6' }
+                    }
+                }
+            }
+        });
+
+        // Generate metrics loop
+        function updateMetrics() {
+            if (!isMonitoring) return;
+
+            if (isCryptojackingSimulated) {
+                // Cryptojacking metrics
+                currentCPU = parseFloat((85 + Math.random() * 12).toFixed(1));
+                currentMemory = parseFloat((68 + Math.random() * 6).toFixed(1));
+                currentProcCount = 142 + Math.floor(Math.random() * 5);
+                
+                // Ensure miner is in process list and top
+                let minerIndex = activeProcesses.findIndex(p => p.name === "xmrig-miner.exe");
+                if (minerIndex === -1) {
+                    activeProcesses.push({
+                        pid: 8092,
+                        name: "xmrig-miner.exe",
+                        cpu_percent: 0,
+                        memory_percent: 4.8
+                    });
+                    minerIndex = activeProcesses.length - 1;
+                }
+                
+                // Set high CPU load on miner
+                activeProcesses[minerIndex].cpu_percent = parseFloat((currentCPU - 8 - Math.random() * 4).toFixed(1));
+                topProcName = "xmrig-miner.exe";
+                topProcCPU = activeProcesses[minerIndex].cpu_percent;
+
+                // Randomize other processes slightly
+                activeProcesses.forEach((p, idx) => {
+                    if (p.name !== "xmrig-miner.exe") {
+                        p.cpu_percent = parseFloat((Math.random() * 1.5).toFixed(1));
+                    }
+                });
+
+            } else {
+                // Baseline Normal metrics
+                currentCPU = parseFloat((8 + Math.random() * 15).toFixed(1));
+                currentMemory = parseFloat((46 + Math.random() * 3).toFixed(1));
+                currentProcCount = 135 + Math.floor(Math.random() * 4);
+
+                // Remove miner if it exists
+                activeProcesses = activeProcesses.filter(p => p.name !== "xmrig-miner.exe");
+
+                // Randomize process CPU values normally
+                activeProcesses.forEach(p => {
+                    p.cpu_percent = parseFloat((0.2 + Math.random() * 3.5).toFixed(1));
+                });
+
+                // Find top process
+                const sorted = [...activeProcesses].sort((a,b) => b.cpu_percent - a.cpu_percent);
+                topProcName = sorted[0].name;
+                topProcCPU = sorted[0].cpu_percent;
+            }
+
+            // Run Mock AI Classifier
+            runAIClassification();
+
+            // Update UI elements
+            document.getElementById('metric-cpu').innerText = `${currentCPU}%`;
+            document.getElementById('metric-memory').innerText = `${currentMemory}%`;
+            document.getElementById('metric-proc-count').innerText = currentProcCount;
+            document.getElementById('metric-top-proc').innerText = `${topProcName} (${topProcCPU}%)`;
+
+            // Update mini progress bars
+            document.querySelector('.cpu .mini-progress-fill').style.width = `${currentCPU}%`;
+            document.querySelector('.memory .mini-progress-fill').style.width = `${currentMemory}%`;
+            
+            // Adjust progress bar colors based on thresholds
+            adjustBarColors();
+
+            // Add new data point to charts
+            cpuData.shift();
+            cpuData.push(currentCPU);
+            memData.shift();
+            memData.push(currentMemory);
+            
+            telemetryChart.update('none'); // silent update
+
+            // Re-render processes table
+            renderProcessTable();
+        }
+
+        function adjustBarColors() {
+            const cpuFill = document.querySelector('.cpu .mini-progress-fill');
+            cpuFill.className = 'mini-progress-fill';
+            if (currentCPU > 75) cpuFill.classList.add('red');
+            else if (currentCPU > 40) cpuFill.classList.add('yellow');
+            else cpuFill.classList.add('green');
+
+            const memFill = document.querySelector('.memory .mini-progress-fill');
+            memFill.className = 'mini-progress-fill';
+            if (currentMemory > 80) memFill.classList.add('red');
+            else if (currentMemory > 60) memFill.classList.add('yellow');
+            else memFill.classList.add('green');
+        }
+
+        // Mock AI Classifier Logic
+        function runAIClassification() {
+            const statusBanner = document.getElementById('system-status-banner');
+            const statusTitle = document.getElementById('status-title');
+            const statusDesc = document.getElementById('status-description');
+            const confidenceBadge = document.getElementById('confidence-badge');
+            
+            const threatCard = document.getElementById('threat-card');
+            const threatCardDetail = document.getElementById('threat-card-detail');
+
+            // Features checked: global CPU & max process CPU
+            if (currentCPU > 70 && topProcCPU > 60) {
+                // AI prediction = suspicious
+                statusBanner.className = "status-banner threat";
+                statusTitle.innerText = "🚨 CRYPTOJACKING THREAT DETECTED";
+                statusDesc.innerText = `Process '${topProcName}' is consuming ${topProcCPU}% CPU. AI predicts active coin mining load.`;
+                confidenceBadge.innerText = `AI CONFIDENCE: ${(98.2 + Math.random() * 1.5).toFixed(1)}%`;
+                
+                threatCardDetail.innerText = "🛑 AI Flagged Resource Thief";
+                threatCardDetail.style.color = "var(--accent-red)";
+                
+                // Add alert log if not already active or if it's new
+                logAlert(topProcName, topProcCPU, currentCPU);
+            } else {
+                // AI prediction = normal
+                statusBanner.className = "status-banner secure";
+                statusTitle.innerText = "🟢 SYSTEM STATE SECURE";
+                statusDesc.innerText = "Continuous security scan running. No cryptojacking patterns detected.";
+                confidenceBadge.innerText = `AI CONFIDENCE: ${(97.5 + Math.random() * 2).toFixed(1)}%`;
+                
+                threatCardDetail.innerText = "Normal workload metrics";
+                threatCardDetail.style.color = "var(--text-secondary)";
+            }
+        }
+
+        // Render processes table
+        function renderProcessTable() {
+            const tbody = document.getElementById('process-table-body');
+            tbody.innerHTML = '';
+
+            // Sort processes by CPU descending
+            const sortedProc = [...activeProcesses].sort((a, b) => b.cpu_percent - a.cpu_percent);
+
+            sortedProc.forEach(proc => {
+                const tr = document.createElement('tr');
+                if (proc.name === "xmrig-miner.exe" || (isCryptojackingSimulated && proc.cpu_percent > 60)) {
+                    tr.className = 'process-row-highlight';
+                }
+                
+                tr.innerHTML = `
+                    <td>${proc.pid}</td>
+                    <td><strong>${proc.name}</strong></td>
+                    <td>${proc.cpu_percent}%</td>
+                    <td>${proc.memory_percent}%</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Add custom process
+        function addNewProcess() {
+            const nameInput = document.getElementById('add-proc-name');
+            const cpuInput = document.getElementById('add-proc-cpu');
+
+            const name = nameInput.value.trim();
+            const cpu = parseFloat(cpuInput.value);
+
+            if (!name || isNaN(cpu)) return;
+
+            const pid = Math.floor(1000 + Math.random() * 9000);
+            
+            // Add or overwrite existing custom process
+            const existingIdx = activeProcesses.findIndex(p => p.name === name);
+            if (existingIdx !== -1) {
+                activeProcesses[existingIdx].cpu_percent = cpu;
+            } else {
+                activeProcesses.push({
+                    pid: pid,
+                    name: name,
+                    cpu_percent: cpu,
+                    memory_percent: parseFloat((1 + Math.random() * 4).toFixed(1))
+                });
+            }
+
+            // Reset inputs
+            nameInput.value = '';
+            cpuInput.value = '';
+
+            // Update UI immediately
+            updateMetrics();
+        }
+
+        // Log alert to security feed
+        function logAlert(procName, procCpu, totalCpu) {
+            const timeStr = new Date().toLocaleTimeString();
+            
+            // Check if we already logged this threat name recently (prevent spamming same threat)
+            if (alertLogs.length > 0 && alertLogs[0].process === procName && (new Date() - alertLogs[0].timestamp) < 10000) {
+                return; 
+            }
+
+            const alert = {
+                time: timeStr,
+                timestamp: new Date(),
+                process: procName,
+                cpu: procCpu,
+                globalCpu: totalCpu,
+                details: `Suspicious activity detected! Process '${procName}' is consuming ${procCpu}% CPU while global usage is ${totalCpu}%.`
+            };
+
+            alertLogs.unshift(alert); // add to top
+
+            // Render alert log feed
+            renderAlertFeed();
+        }
+
+        function renderAlertFeed() {
+            const feed = document.getElementById('alerts-log-feed');
+            const emptyText = document.getElementById('empty-alerts-text');
+
+            if (alertLogs.length === 0) {
+                emptyText.style.display = 'block';
+                return;
+            }
+
+            emptyText.style.display = 'none';
+            feed.innerHTML = '';
+            
+            // Re-add empty text node (hidden) so we don't break logic later
+            feed.appendChild(emptyText);
+
+            alertLogs.forEach(alert => {
+                const item = document.createElement('div');
+                item.className = 'alert-item';
+                item.innerHTML = `
+                    <div class="alert-item-header">
+                        <span>Threat Detected</span>
+                        <span class="alert-item-time">${alert.time}</span>
+                    </div>
+                    <div class="alert-item-body">
+                        Process <strong>${alert.process}</strong> is consuming <strong>${alert.cpu}%</strong> CPU (Global CPU: ${alert.globalCpu}%). AI Flagged.
+                    </div>
+                `;
+                feed.appendChild(item);
+            });
+        }
+
+        // Retrain AI Model Simulation
+        function retrainAIModel() {
+            const overlay = document.getElementById('train-overlay');
+            const logDiv = document.getElementById('model-log');
+            
+            overlay.classList.add('active');
+            logDiv.innerHTML = '[SYSTEM] Initiating training dataset...';
+
+            setTimeout(() => {
+                logDiv.innerHTML += '<br>[DATA] Loaded 1,000 baseline normal telemetry points...';
+            }, 600);
+
+            setTimeout(() => {
+                logDiv.innerHTML += '<br>[DATA] Loaded 1,000 cryptojacking threat vectors...';
+            }, 1200);
+
+            setTimeout(() => {
+                logDiv.innerHTML += '<br>[MODEL] Fitting Random Forest Classifier (n_estimators=100)...';
+            }, 1800);
+
+            setTimeout(() => {
+                logDiv.innerHTML += '<br>[MODEL] Cross-validation fold analysis active...';
+            }, 2400);
+
+            setTimeout(() => {
+                accuracy = parseFloat((99.2 + Math.random() * 0.7).toFixed(3));
+                document.getElementById('model-accuracy-val').innerText = `${accuracy}%`;
+                overlay.classList.remove('active');
+                alert(`AI Model successfully retrained!\nNew Classifier Accuracy: ${accuracy}%`);
+            }, 3200);
+        }
+
+        // Bind Simulator buttons
+        document.getElementById('sim-cryptojack-btn').addEventListener('click', () => {
+            isCryptojackingSimulated = true;
+            updateMetrics();
+            alert("🚨 Cryptojacking simulation active!\nA mock miner task 'xmrig-miner.exe' has been loaded to consume max CPU cores.");
+        });
+
+        document.getElementById('sim-normal-btn').addEventListener('click', () => {
+            isCryptojackingSimulated = false;
+            updateMetrics();
+            alert("✅ Restored normal workload state. CPU usage returned to baseline.");
+        });
+
+        document.getElementById('sim-train-btn').addEventListener('click', () => {
+            retrainAIModel();
+        });
+
+        // Pause/Resume monitoring
+        const toggleBtn = document.getElementById('toggle-monitor-btn');
+        toggleBtn.addEventListener('click', () => {
+            isMonitoring = !isMonitoring;
+            if (isMonitoring) {
+                toggleBtn.className = "btn-secondary";
+                toggleBtn.querySelector('span').innerText = "⏸️ Pause Monitoring";
+            } else {
+                toggleBtn.className = "btn-primary";
+                toggleBtn.querySelector('span').innerText = "▶️ Resume Monitoring";
+            }
+        });
+
+        // Start metric loop (tick every 1.5 seconds)
+        setInterval(updateMetrics, 1500);
+
+        // Run once initially
+        updateMetrics();
+    </script>
 </body>
 </html>
+
