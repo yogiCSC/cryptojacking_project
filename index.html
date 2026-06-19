@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Cryptojacking Detection Shield</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar or Header -->
+        <header class="app-header">
+            <div class="logo-area">
+                <i class="fa-solid fa-shield-halved logo-icon"></i>
+                <div class="logo-text">
+                    <h1>Aegis <span class="accent-text">AI</span></h1>
+                    <p>Cryptojacking Detection Suite</p>
+                </div>
+            </div>
+            <div class="system-status-indicator" id="status-badge">
+                <span class="status-dot"></span>
+                <span class="status-label">INITIALIZING</span>
+            </div>
+        </header>
+
+        <!-- Main Dashboard Grid -->
+        <main class="dashboard-grid">
+            <!-- Left Side: System Metrics & Stats -->
+            <section class="grid-col-left">
+                <!-- Status & Telemetry Summary Card -->
+                <div class="card status-summary-card" id="status-card">
+                    <div class="card-glow"></div>
+                    <div class="card-header">
+                        <h2>Threat Detection Engine</h2>
+                        <i class="fa-solid fa-server header-icon"></i>
+                    </div>
+                    <div class="status-display">
+                        <div class="status-circle-outer" id="status-ring">
+                            <div class="status-circle-inner">
+                                <i class="fa-solid fa-circle-check main-status-icon" id="status-icon"></i>
+                                <span class="status-percentage" id="cpu-percentage-text">0%</span>
+                                <span class="status-subtext">CPU LOAD</span>
+                            </div>
+                        </div>
+                        <div class="status-details">
+                            <h3 id="security-state-title">System Status: Secure</h3>
+                            <p id="security-state-desc">The AI model is monitoring background processes. No threats detected.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Charts Card -->
+                <div class="card chart-card">
+                    <div class="card-header">
+                        <h2>Telemetry Analytics (Live)</h2>
+                        <div class="chart-legend">
+                            <span class="legend-item"><span class="legend-color cpu"></span> CPU %</span>
+                            <span class="legend-item"><span class="legend-color mem"></span> Memory %</span>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="telemetryChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- AI Model Training & DB Panel -->
+                <div class="card ai-card">
+                    <div class="card-header">
+                        <h2>Machine Learning Engine</h2>
+                        <i class="fa-solid fa-brain header-icon"></i>
+                    </div>
+                    <div class="ai-controls">
+                        <div class="ai-stat-row">
+                            <span class="stat-label">Model Status:</span>
+                            <span class="stat-value highlight" id="model-status">Untrained</span>
+                        </div>
+                        <div class="ai-stat-row">
+                            <span class="stat-label">Collected Logs:</span>
+                            <span class="stat-value" id="collected-logs">0</span>
+                        </div>
+                        <p class="ai-info-text">
+                            The Isolation Forest detects structural anomalies, while the Random Forest Classifier maps process features. Train the model once baseline data is collected.
+                        </p>
+                        <div class="button-group">
+                            <button id="btn-train" class="btn btn-primary">
+                                <i class="fa-solid fa-microchip"></i> Retrain Model
+                            </button>
+                            <button id="btn-clear" class="btn btn-secondary">
+                                <i class="fa-solid fa-circle-xmark"></i> Clear Alerts
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Side: Running Processes & Alert Log -->
+            <section class="grid-col-right">
+                <!-- Running Processes -->
+                <div class="card processes-card">
+                    <div class="card-header">
+                        <h2>Active Processes</h2>
+                        <div class="search-box">
+                            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                            <input type="text" id="proc-search" placeholder="Search process...">
+                        </div>
+                    </div>
+                    <div class="table-wrapper">
+                        <table class="process-table">
+                            <thead>
+                                <tr>
+                                    <th>PID</th>
+                                    <th>Process Name</th>
+                                    <th class="num-col">CPU %</th>
+                                    <th class="num-col">Mem %</th>
+                                    <th>Threat Level</th>
+                                </tr>
+                            </thead>
+                            <tbody id="process-table-body">
+                                <tr>
+                                    <td colspan="5" class="empty-table">Waiting for client agent report...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Recent Alerts Log -->
+                <div class="card alerts-card">
+                    <div class="card-header">
+                        <h2>Incidents Log</h2>
+                        <i class="fa-solid fa-bell header-icon" id="alerts-header-icon"></i>
+                    </div>
+                    <div class="alerts-list" id="alerts-list">
+                        <div class="empty-alerts">
+                            <i class="fa-solid fa-shield-halved empty-icon"></i>
+                            <p>No cryptojacking alerts triggered yet</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="toast">
+        <i class="fa-solid fa-info-circle toast-icon"></i>
+        <span id="toast-message">Message</span>
+    </div>
+
+    <!-- Script imports -->
+    <script src="/static/app.js"></script>
+</body>
+</html>
